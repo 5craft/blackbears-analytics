@@ -1,0 +1,599 @@
+@font-face {
+    font-family: 'museo_sans_cyrl500';
+    src: url('../fonts/museosans/museosanscyrl-500-webfont.eot');
+    src: url('../fonts/museosans/museosanscyrl-500-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/museosans/museosanscyrl-500-webfont.woff') format('woff'),
+         url('../fonts/museosans/museosanscyrl-500-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'museo_sans_cyrl700';
+    src: url('../fonts/museosans/museosanscyrl-700-webfont.eot');
+    src: url('../fonts/museosans/museosanscyrl-700-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/museosans/museosanscyrl-700-webfont.woff') format('woff'),
+         url('../fonts/museosans/museosanscyrl-700-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'museo_sans_cyrl900';
+    src: url('../fonts/museosans/museosanscyrl-900-webfont.eot');
+    src: url('../fonts/museosans/museosanscyrl-900-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/museosans/museosanscyrl-900-webfont.woff') format('woff'),
+         url('../fonts/museosans/museosanscyrl-900-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+html, body { 
+	height: 100%; 
+	margin: 0; 
+	padding: 0; 
+}
+body {
+	margin: 0 auto;
+	padding: 0;
+	font: 12px "museo_sans_cyr500", "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif;
+	-webkit-text-size-adjust: 100%;
+	-webkit-overflow-scrolling: touch;
+	word-wrap: break-word;
+	min-width: 825px;
+	position:relative;
+    
+}
+a, span {
+	outline: none;
+}
+a,a:hover {
+	text-decoration: none;
+}
+iframe {
+	border: none;
+}
+.hidden {
+	display:none !important;
+}
+
+.block {
+	position: relative;
+	overflow: hidden;
+}
+
+#container {
+	position:relative;
+	overflow:hidden;
+	display:table;
+	width:100%;
+	max-height: 100%;
+	min-height: 100%;
+}
+#error {
+	position:absolute;
+	top:0;
+	width:100%;
+	padding: 47px 20px;
+	background-color:#263F4C;
+	font-family: 'museo_sans_cyrl700';
+	font-weight: normal;
+	font-size:1.6em;
+	color:#FF6D4D;
+	text-align: center;
+	z-index:11;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+#sidebar {
+	display:table-cell;
+	vertical-align:top;
+	background: #F7F7F7;
+	-webkit-box-shadow: inset -1px 0px 0px 0px #EBEBEB;
+	-moz-box-shadow: inset -1px 0px 0px 0px #EBEBEB;
+	box-shadow: inset -1px 0px 0px 0px #EBEBEB;
+	width:180px;
+	height: 100%;
+}
+#centerbox {
+	position:relative;
+	overflow:hidden;
+	display:table-cell;
+	vertical-align:top;
+	background:#fff;
+	max-height: 100%;
+}
+#loading {
+	display:none;
+	background-color:#F7F7F7;
+	position:absolute;
+	/*overflow:hidden;*/
+	z-index: 10;
+	top:0;
+	left:0;
+	width:100%;
+	height:100%;
+	font-family: 'museo_sans_cyrl700';
+	font-weight: normal;
+	font-size:1.6em;
+	color:#A2A6A8;
+}
+#loading.active { display:block;}
+#loading div {
+    display:table;
+    width:100%;
+    height:100%;
+    vertical-align:middle;
+    text-align:center;
+}
+#loading span {
+    display: table-cell;
+    vertical-align:middle;
+    text-align:center;
+}
+#sidebar_header {
+	position: relative;
+	min-height: 78px;
+	width:100%;
+	background: #263F4C url('../img/logo.png') no-repeat 12px 9px;
+    background-image: -webkit-image-set(url('../img/logo.png') 1x, url('../img/logo@2x.png') 2x);
+}
+#sidebar_header h2 {
+	margin:0;
+	padding:13px 10px 5px 60px;
+	font-family: 'museo_sans_cyrl700';
+	font-weight: normal;
+	font-size:1em;
+	color:#48C28D;
+}
+#sidebar_header h2 strong {
+	font-family: 'museo_sans_cyrl900';
+	font-weight: normal;
+}
+#sidebar_header h3.account {
+	font-family: 'museo_sans_cyrl700';
+	font-weight: normal;
+	font-size:1em;
+	cursor: pointer;
+	white-space: nowrap;
+	padding: 6px;
+	border-radius: 3px;
+	position:absolute;
+	z-index: 2;
+	top: 29px;
+    left: 54px;
+}
+#sidebar_header h3.account.active { background-color: #48C28D; }
+#sidebar_header h3.account .nickname {
+	font-size:1em;
+	color:#fff;
+}
+#sidebar_header h3.account:first-letter { color:#F44646; }
+#sidebar_header .more {
+	display:inline-block;
+	vertical-align:middle;
+	width:6px;
+	height:4px;
+	background: url('../img/angle_icon.png') no-repeat 0 0;
+    background-image: -webkit-image-set(url('../img/angle_icon.png') 1x, url('../img/angle_icon@2x.png') 2x);
+}
+#sidebar_header h3.account.active .more { display:none; }
+#sidebar_header h3.account .logout {
+	font-size:1em;
+	color:#fff;
+	margin-left: 9px;
+	display:none;
+}
+#sidebar_header h3.account.active .logout { display:inline-block; }
+#sidebar_search {
+	position:relative;
+	overflow:hidden;
+	height: 38px;
+}
+
+#sidebar_applist {
+	position:relative;
+	overflow:scroll;
+	max-height: 100%;
+}
+#sidebar_applist ul {
+	margin:0;
+	padding:0;
+	list-style: none;
+}
+
+#sidebar_applist li {
+	position:relative;
+	overflow:hidden;
+	width:100%;
+	display:block;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	display:table;
+	padding:10px 12px;
+	cursor: pointer;
+}
+#sidebar_applist li:after {
+	content:'';
+	position:absolute;
+	bottom:0;
+	left:12px;
+	width:100%;
+	height:1px;
+	background:rgba(0,0,0,0.05);
+}
+#sidebar_applist li.add_app:after {
+	background:none;
+	height:0;
+}
+#sidebar_applist li:hover { background:#E9EBEE; }
+#sidebar_applist li.active,
+#sidebar_applist li.active:hover {
+	cursor: auto;
+	background:#38D893;
+	-webkit-box-shadow: inset -3px 0px 0px 0px #32B77E;
+	-moz-box-shadow: inset -3px 0px 0px 0px #32B77E;
+	box-shadow: inset -3px 0px 0px 0px #32B77E;
+}
+#sidebar_applist li.add_app a {
+	display: table;
+	outline: none;
+	width: 100%;
+}
+#sidebar_applist li .right.icon {
+	display:table-cell;
+	vertical-align:middle;
+	width:40px;
+	height:40px;
+	border-radius: 10px;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+#sidebar_applist li .right.icon.all {
+	border:2px solid rgba(0,0,0,0.04);
+	background: rgba(0,0,0,0.02) url('../img/star_icon.png') no-repeat center center;
+    background-image: -webkit-image-set(url('../img/star_icon.png') 1x, url('../img/star_icon@2x.png') 2x);
+}
+#sidebar_applist li .right.icon.ios {
+	background: url('../img/ios_icon.png') no-repeat center center;
+    background-image: -webkit-image-set(url('../img/ios_icon.png') 1x, url('../img/ios_icon@2x.png') 2x);
+}
+#sidebar_applist li .right.icon.android {
+	background: url('../img/android_icon.png') no-repeat center center;
+    background-image: -webkit-image-set(url('../img/android_icon.png') 1x, url('../img/android_icon@2x.png') 2x);
+}
+#sidebar_applist li .right.icon.add {
+	border:2px solid rgba(0,0,0,0.04);
+	text-align:center;
+	color:#DEDEDE;
+	font-size: 2.2em;
+    line-height: 31px;
+    vertical-align: top;
+}
+
+#sidebar_applist li .left {
+	display:table-cell;
+	vertical-align:middle;
+	padding-left: 8px;
+	font-family: 'museo_sans_cyrl700';
+	font-weight: normal;
+	font-size:1em;
+}
+#sidebar_applist li .left .title { display:block; color:#67676C; line-height: 1.5em; }
+#sidebar_applist li .left .subtitle { display:block; color:#A2A6A8; font-size:0.8em; }
+#sidebar_applist li.active .left .title, 
+#sidebar_applist li.active .left .subtitle { color:#fff; }
+
+
+
+#centerbox .box {
+	position:relative;
+	overflow:hidden;
+	padding:16px 40px 50px 40px;
+}
+#center_title{
+	padding: 0px 0px 10px 0px;
+}
+#center_title .title{
+	font-family: 'museo_sans_cyrl700';
+	font-weight: normal;
+	line-height: 1.5em;
+	color:#67676C;
+	font-size:1.6em;
+	margin:0;
+	padding:0;
+}
+#center_title .subtitle{
+	font-family: 'museo_sans_cyrl700';
+	font-weight: normal;
+	line-height: 1.5em;
+	color:#A2A6A8;
+	font-size:1em;
+	margin:0;
+	padding:0;
+}
+
+.calendarfilter_box {
+	padding: 6px 0px 22px 0px;
+	color:#DEE1E3;
+}
+.calendar_input {
+	background:#fff;
+	border: 1px solid #e7e7e7;
+	border-radius: 3px;
+	padding:11px 17px;
+	font-family: 'museo_sans_cyrl700';
+	font-weight: normal;
+	color:#67676C;
+	width: 98px;
+}
+.calendarfilter_box ul {
+	margin:0;
+	padding:9px 0px 0px 0px;
+	list-style:none;
+}
+.calendarfilter_box li {
+	display: inline;
+	vertical-align:top;
+	font-family: 'museo_sans_cyrl700';
+	font-weight: normal;
+	font-size: 0.9em;
+	color:#67676C;
+	margin: 0px 3px 0px 0px;
+	cursor: pointer;
+}
+.calendarfilter_box li.active { color: #54CA9E; text-decoration: underline; cursor: auto; }
+
+
+.filter_box {
+	padding:3px 0px;
+}
+.filter_box h3 {
+	font-family: 'museo_sans_cyrl700';
+	font-weight: normal;
+	font-size:1em;
+	color:#A2A6A8;
+	margin:5px 0;
+}
+.filter_box ul {
+	padding:0;
+	margin:0;
+	list-style: none;
+	font-size:0;
+}
+
+.filter_box li {
+	position:relative;
+	overflow:hidden;
+	display:inline-block;
+	vertical-align:top;
+	background-color:#FDFDFD;
+	border:1px solid #EDF2F0;
+	border-radius: 3px;
+	margin:0px 8px 8px 0;
+	padding:12px 15px;
+	font-size:12px;
+	color:#A2A6A8;
+	cursor:pointer;
+	text-align:center;
+}
+
+.filter_box li:hover { 
+	background-color: #E9EBEE;
+    border-color: #CFD3D1;
+	color:#465361;
+}
+.filter_box li.active,
+.filter_box li.active:hover { 
+	background-color: #38D893;
+    border-color: #32B77E;
+    color: #465361;
+}
+
+.filter_box.ads li { min-height: 6px; vertical-align:middle; }
+.filter_box .date {
+	font-family: 'museo_sans_cyrl500';
+    font-weight: normal;
+	font-size:10px;
+	display:block;
+	color:#A2A6A8;
+	margin: 3px 0px 0px 0px;
+}
+.filter_box .date.off { color:#FA9F7D; }
+.filter_box.ads li.active .date,
+.filter_box.ads li.active .date.off {
+	color:#fff;
+}
+
+.filter_box.ads li.all {
+	min-height: 25px;
+    line-height: 25px;
+}
+
+.filter_box.ads li.withlogo {
+	background-repeat: no-repeat;
+	background-position: center 8px;
+	padding-top:30px;
+	padding-bottom: 5px;
+	min-width: 90px;
+	font-size:0;
+}
+.filter_box.ads li.unity {
+	background-image: url('../img/unity_logo.png');
+    background-image: -webkit-image-set(url('../img/unity_logo.png') 1x, url('../img/unity_logo@2x.png') 2x);
+}
+.filter_box.ads li.applovin {
+	background-image: url('../img/applovin_logo.png');
+    background-image: -webkit-image-set(url('../img/applovin_logo.png') 1x, url('../img/applovin_logo@2x.png') 2x);
+}
+.filter_box.ads li.vungle {
+	background-image: url('../img/vungle_logo.png');
+	background-position: center 5px;
+    background-image: -webkit-image-set(url('../img/vungle_logo.png') 1x, url('../img/vungle_logo@2x.png') 2x);
+}
+
+.filter_box.ads li.active.unity {
+	background-image: url('../img/unity_logo_hover.png');
+    background-image: -webkit-image-set(url('../img/unity_logo_hover.png') 1x, url('../img/unity_logo_hover@2x.png') 2x);
+}
+.filter_box.ads li.active.applovin {
+	background-image: url('../img/applovin_logo_hover.png');
+    background-image: -webkit-image-set(url('../img/applovin_logo_hover.png') 1x, url('../img/applovin_logo_hover@2x.png') 2x);
+}
+.filter_box.ads li.active.vungle {
+	background-image: url('../img/vungle_logo_hover.png');
+	background-position: center 5px;
+    background-image: -webkit-image-set(url('../img/vungle_logo_hover.png') 1x, url('../img/vungle_logo_hover@2x.png') 2x);
+}
+
+.ads_platform_keys_show_box {
+	position:relative;
+	overflow:hidden;
+	background-color:#FDFDFD;
+	border:1px solid #EDF2F0;
+	border-radius: 3px;
+	padding:12px 15px;
+	font-size:12px;
+	color:#A2A6A8;
+	cursor:pointer;
+	text-align:left;
+	font-family: 'museo_sans_cyrl700';
+	font-weight: normal;
+}
+#ads_platform_keys_box .ads_platform_keys_show_box .box {
+	width: 164px;
+	display:inline-block;
+	padding: 0 5px 0 0;
+	vertical-align: middle;
+}
+
+.ads_platform_keys_show_box .label {
+	display:block;
+	font-size:0.9em;
+}
+.ads_platform_keys_show_box .key {
+	display:block;
+	color:#465361;
+	white-space: nowrap;
+	overflow: hidden;
+	height: 14px;
+	/*min-width: 150px;*/
+}
+.ads_platform_keys_show_box .change_keys {
+	position:absolute;
+	right: 15px;
+	line-height: 27px;
+}
+.ads_platform_keys_show_box .save_keys { display:none; }
+
+#ads_platform_keys_box .ads_platform_keys_show_box.edit {
+	background-color:transparent;
+	border:none;
+	padding: 0;
+	cursor: auto;
+}
+#ads_platform_keys_box .ads_platform_keys_show_box.edit .box {
+	width: 340px;
+	background-color:#FDFDFD;
+	border:1px solid #EDF2F0;
+	border-radius:3px;
+	display:block;
+	padding: 5px 15px;
+	margin:4px 0;
+}
+#ads_platform_keys_box .ads_platform_keys_show_box.edit .save_keys { 
+	display:block; 
+	float:left;
+	background:#38D893;
+	color:#fff;
+	border-radius:3px;
+	padding:12px 16px;
+	cursor: pointer;
+}
+#ads_platform_keys_box .ads_platform_keys_show_box.edit .change_keys { display:none; }
+
+
+#dashboard {
+	position:relative;
+	overflow: hidden;
+	max-width:564px;
+	padding: 10px 0;
+}
+#dashboard ul {
+	padding:0;
+	margin:0;
+	list-style: none;
+	font-size:0;
+}
+.dashboard_box {
+	position:relative;
+	overflow:hidden;
+	display:inline-block;
+	vertical-align:top;
+	background-color:#F7F7F7;
+	width:180px;
+	height:94px;
+	margin:0px 8px 8px 0;
+	font-family: 'museo_sans_cyrl700';
+	font-weight: normal;
+	font-size:12px;
+}
+.dashboard_box.green { background-color:#38D893;}
+.dashboard_box .value {
+	display:block;
+	font-size:2.9em;
+	color:#465361;
+	padding: 14px 18px 0px 18px;
+	line-height: 1.1em;
+}
+.dashboard_box.green .value { color:#fff;}
+.dashboard_box .desc {
+	display:block;
+	color:#67676C;
+	padding: 5px 20px;
+    line-height: 1em;
+}
+.dashboard_box.green .desc { color:#465361;}
+
+.mini-page {
+    background-color:#263F4C;
+    min-width: 200px;
+}
+.login-box {
+	display: table-cell;
+    vertical-align: middle;
+}
+.login-logo {
+	display:block;
+	outline:none;
+	background: url('../img/logo_big.png') no-repeat center center;
+    background-image: -webkit-image-set(url('../img/logo_big.png') 1x, url('../img/logo_big@2x.png') 2x);
+    width: 133px;
+	height:178px;
+	margin:0 auto;
+}
+.login-button {
+	display:block;
+	outline:none;
+	background: #fff url('../img/appmetrica_logo.png') no-repeat center center;
+    background-image: -webkit-image-set(url('../img/appmetrica_logo.png') 1x, url('../img/appmetrica_logo@2x.png') 2x);
+    
+	border-radius:5px;
+	text-align: center;
+	width:140px;
+	padding: 9px 18px;
+	font-family: 'museo_sans_cyrl700';
+	font-weight: normal;
+	margin:30px auto 10px auto
+}
+.login-button .top {
+	display:block;
+	color:#465361;
+	font-size:1.4em;
+	margin-bottom:49px;
+}
+.login-button .bottom { 
+	display:block; 
+	color:#A2A6A8; 
+	margin-bottom: 5px; }

@@ -1,0 +1,353 @@
+#!/bin/bash
+################################################################################################
+# List of commands:					     								              	#
+# 	    --ch-server=*				              Set clickhouse server connection address (default is localhost)		              #
+# 	    -db=*|--ch-database=*	                  	Set database in clickhouse to use (default is 'default')			              #
+# 	    --purchase-queue=*	                    		Set file to store events grabbing queue (default purchase_queue)	                            #
+# 	    --adview-queue=*	                    		Set file to store events grabbing queue (default adview_queue)		              #
+# 	    --install-queue=*               			Set file to store installations grabbing queue (default install_queue)	              #
+# 	    -log=*|--log-file=*			               Set log file (default is /dev/null)						              #
+# 	    --ch-password=*	                        		Set clickhouse password (default is empty)				              #
+# 	    --ch-user=*				               Set clickhouse user (default is 'default')					              #
+# 	    --date-since=*				Set date since (default is 24 hours ago)					              #
+# 	    --date-until=*				               Set date until (default is time right now)					              #
+#     	    --purchase-event=*			               Set purchase event in appmetrica (default is 'purchase')		                            #
+#     	    --adview-event=*				Set purchase event in appmetrica (default is 'ads_view')		                            #
+################################################################################################
+# DEFAULT CONFIGURATION
+DATESINCE=$(date +%Y-%m-%d%%20%T -d "yesterday")
+DATEUNTIL=$(date +%Y-%m-%d%%20%T)
+PATH_TO_LOG=/dev/null
+PURCHASE_QUEUE_FILE=$(echo ""$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/purchase_queue")
+INSTALL_QUEUE_FILE=$(echo ""$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/install_queue")
+ADVIEW_QUEUE_FILE=$(echo ""$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/adview_queue")
+DATABASE=default
+PURCHASE_EVENTNAME=purchase
+ADVIEW_EVENTNAME=ads_view
+USER=default
+PASSWORD=''
+SERVER=localhost
+TEMPORARY_DATA_FILE=$(echo ""$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/grabbed_data.tmp")                #temporary file with yandex.log answer
+TEMPORARY_APPLIST_FILE=$(echo ""$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/applist.tmp")                         #temporary file with applist with tokens
+for i in "$@"
+do
+	case $i in
+	    --ch-server=*)
+	    SERVER="${i#*=}"
+	    shift # past argument=value
+	    ;;
+	    -db=*|--ch-database=*)
+	    DATABASE="${i#*=}"
+	    shift # past argument=value
+	    ;;
+    	    --adview-queue=*)
+	    ADVIEW_QUEUE_FILE="${i#*=}"
+	    shift # past argument=value
+	    ;;
+	    --purchase-queue=*)
+	    PURCHASE_QUEUE_FILE="${i#*=}"
+	    shift # past argument=value
+	    ;;
+	    --install-queue=*)
+	    INSTALL_QUEUE_FILE="${i#*=}"
+	    shift # past argument=value
+	    ;;
+	    -log=*|--log-file=*)
+	    PATH_TO_LOG="${i#*=}"
+	    shift # past argument=value
+	    ;;
+	    --ch-password=*)
+	    PASSWORD="${i#*=}"
+	    shift # past argument=value
+	    ;;
+	    --ch-user=*)
+	    USER="${i#*=}"
+	    shift # past argument=value
+	    ;;
+	    --date-since=*)
+	    DATESINCE="${i#*=}"
+	    DATESINCE=$(date -d "$DATESINCE" +%Y-%m-%d%%20%H:%M:%S)
+	    shift # past argument=value
+	    ;;
+	    --date-until=*)
+	    DATEUNTIL="${i#*=}"
+	    DATEUNTIL=$(date -d "$DATEUNTIL" +%Y-%m-%d%%20%H:%M:%S)
+	    shift # past argument=value
+	    ;;
+    	    --purchase-event=*)
+	    PURCHASE_EVENTNAME="${i#*=}"
+	    shift # past argument=value
+	    ;;
+	    --adview-event=*)
+	    ADVIEW_EVENTNAME="${i#*=}"
+	    shift # past argument=value
+	    ;;
+	    *)
+	           # unknown option
+	    ;;
+	esac
+done
+
+if [ -z ${SERVER+x} ]
+then 
+echo "Server isn't set";
+return 1
+fi
+
+if [ -z ${USER+x} ]
+then 
+echo "Clickhouse user isn't set";
+return 1
+fi
+
+if [ -z ${PASSWORD+x} ]
+then 
+echo "Clickhouse password isn't set";
+return 1
+fi
+
+if [ -z ${PURCHASE_QUEUE_FILE+x} ]
+then 
+echo "File for purchase queue isn't set";
+return 1
+fi
+
+if [ -z ${ADVIEW_QUEUE_FILE+x} ]
+then 
+echo "File for adview queue isn't set";
+return 1
+fi
+
+if [ -z ${INSTALL_QUEUE_FILE+x} ]
+then 
+echo "File for installation queue isn't set";
+return 1
+fi
+
+if [ -z ${DATABASE+x} ]
+then 
+echo "Clickhouse database to use isn't set";
+return 1
+fi
+
+if [ -z ${PURCHASE_EVENTNAME+x} ]
+then 
+echo "Purchase event name to grab isn't set";
+return 1
+fi
+
+if [ -z ${ADVIEW_EVENTNAME+x} ]
+then 
+echo "Adview event name to grab isn't set";
+return 1
+fi
+
+touch $PURCHASE_QUEUE_FILE
+touch $INSTALL_QUEUE_FILE
+touch $ADVIEW_QUEUE_FILE
+
+printf 'Script event grabber was started at ' >> $PATH_TO_LOG
+date >> $PATH_TO_LOG
+
+clickhouse-client -h $SERVER -u $USER --password $PASSWORD --query="SELECT anyLast(token) as token, id, anyLast(name) as name FROM $DATABASE.appmetrica_app GROUP BY id FORMAT CSV" > $TEMPORARY_APPLIST_FILE
+while read j
+do
+	TOKEN=$(echo $j | cut -f1 -d, | tr -d \")
+	APPLICATION_ID=$(echo $j | cut -f2 -d,)
+	APPLICATION_NAME=$(echo $j | cut -f3 -d, | tr -d \")
+	{
+		TEMP_LINE=$(grep "$TOKEN,$APPLICATION_ID" $PURCHASE_QUEUE_FILE | tail -1 | cut -f4 -d, | sed 's/%20/ /g');
+		echo  $(date -d "$TEMP_LINE" "+%s") ;
+		echo $(date -d "$(echo $DATESINCE | sed 's/%20/ /g')" "+%s");
+		if  [ -n "$TEMP_LINE" ] && [  $(date -d "$TEMP_LINE" "+%s") -gt $(date -d "$(echo $DATESINCE | sed 's/%20/ /g')" "+%s") ]; then
+			PURCHASE_DATESINCE=$(date -d "$(grep $TOKEN,$APPLICATION_ID $PURCHASE_QUEUE_FILE | tail -1 | cut -f4 -d, | sed 's/%20/ /')" "+%Y-%m-%d%%20%H:%M:%S");
+		else
+			PURCHASE_DATESINCE=$DATESINCE;
+		fi
+		TEMP_LINE=$(grep "$TOKEN,$APPLICATION_ID" $INSTALL_QUEUE_FILE | tail -1| cut -f4 -d, | sed 's/%20/ /g' );
+		if  [ -n "$TEMP_LINE" ] && [  $(date -d  "$TEMP_LINE" "+%s") -gt $(date -d "$( echo $DATESINCE | sed 's/%20/ /g')" "+%s") ]; then
+			INSTALL_DATESINCE=$(date -d "$(grep $TOKEN,$APPLICATION_ID $INSTALL_QUEUE_FILE | tail -1| cut -f4 -d, | sed 's/%20/ /g')" "+%Y-%m-%d%%20%H:%M:%S");
+		else
+			INSTALL_DATESINCE=$DATESINCE;
+		fi
+		TEMP_LINE=$(grep "$TOKEN,$APPLICATION_ID" $ADVIEW_QUEUE_FILE | tail -1| cut -f4 -d, | sed 's/%20/ /g' );
+		if  [ -n "$TEMP_LINE" ] && [  $(date -d  "$TEMP_LINE" "+%s") -gt $(date -d "$( echo $DATESINCE | sed 's/%20/ /g')" "+%s") ]; then
+			ADVIEW_DATESINCE=$(date -d "$(grep $TOKEN,$APPLICATION_ID $ADVIEW_QUEUE_FILE | tail -1| cut -f4 -d, | sed 's/%20/ /g')" "+%Y-%m-%d%%20%H:%M:%S");
+		else
+			ADVIEW_DATESINCE=$DATESINCE;
+		fi
+		# echo $APPLICATION_ID $PURCHASE_DATESINCE $ADVIEW_DATESINCE $INSTALL_DATESINCE
+		unset TEMP_LINE;
+	} &>/dev/null
+
+	while read i 
+	do
+		FILE_TOKEN=$(echo $i | cut -f1 -d,)
+		FILE_APPLICATION_ID=$(echo $i | cut -f2 -d,)
+		FILE_DATESINCE=$(echo $i | cut -f3 -d,)
+		FILE_DATEUNTIL=$(echo $i | cut -f4 -d,)  
+		FILE_APPLICATION_NAME=$(echo $i | cut -f5 -d,) 
+		if [ "$FILE_APPLICATION_ID" != "$APPLICATION_ID" ]; then
+			continue
+		fi
+		{
+		 curl -G \
+		 'https://beta.api-appmetrika.yandex.ru/logs/v1/export/events.csv' \
+		 -d oauth_token=$FILE_TOKEN \
+		 -d date_since=$FILE_DATESINCE \
+		 -d date_until=$FILE_DATEUNTIL \
+		 -d fields=app_package_name,event_name,event_json,event_datetime,os_name,ios_ifa,android_id \
+	 	 -d event_name=$PURCHASE_EVENTNAME \
+		 -d application_id=$FILE_APPLICATION_ID > $TEMPORARY_DATA_FILE
+		 if [ -s "$TEMPORARY_DATA_FILE" ] && [ "$(grep event_json,event_datetime,os_name,ios_ifa,android_id $TEMPORARY_DATA_FILE)" ]
+	 		then 
+ 			sed 1d $TEMPORARY_DATA_FILE | sed "s/^/$FILE_APPLICATION_NAME,$FILE_APPLICATION_ID,/" |clickhouse-client -h $SERVER -u $USER --password $PASSWORD --query="INSERT INTO $DATABASE.purchase_event FORMAT CSV"
+			if [ "$?" -eq 0 ] 
+				then
+				echo "Purchases for  application ID $FILE_APPLICATION_ID for date period $FILE_DATESINCE - $FILE_DATEUNTIL was grabbed" >> $PATH_TO_LOG
+			 else
+				echo "Purchases for  application ID $FILE_APPLICATION_ID for date period $FILE_DATESINCE - $FILE_DATEUNTIL was empty" >> $PATH_TO_LOG
+			fi
+			sed -n "/$FILE_TOKEN,$FILE_APPLICATION_ID,$FILE_DATESINCE,$FILE_DATEUNTIL/!p" $PURCHASE_QUEUE_FILE >  tmp && mv tmp $PURCHASE_QUEUE_FILE
+		fi
+		} &> /dev/null
+	done < $PURCHASE_QUEUE_FILE;
+	if [ -s $TEMPORARY_DATA_FILE ]
+		then
+		rm $TEMPORARY_DATA_FILE
+	fi
+	while read i 
+	do
+		FILE_TOKEN=$(echo $i | cut -f1 -d,)
+		FILE_APPLICATION_ID=$(echo $i | cut -f2 -d,)
+		FILE_DATESINCE=$(echo $i | cut -f3 -d,)
+		FILE_DATEUNTIL=$(echo $i | cut -f4 -d,)  
+		FILE_APPLICATION_NAME=$(echo $i | cut -f5 -d,) 
+		if [ "$FILE_APPLICATION_ID" != "$APPLICATION_ID" ]; then
+			continue
+		fi
+		{
+		 curl -G \
+		 'https://beta.api-appmetrika.yandex.ru/logs/v1/export/events.csv' \
+		 -d oauth_token=$FILE_TOKEN \
+		 -d date_since=$FILE_DATESINCE \
+		 -d date_until=$FILE_DATEUNTIL \
+		 -d fields=app_package_name,event_json,event_datetime,ios_ifa,android_id \
+	 	 -d event_name=$ADVIEW_EVENTNAME \
+		 -d application_id=$FILE_APPLICATION_ID > $TEMPORARY_DATA_FILE
+		 if [ -s "$TEMPORARY_DATA_FILE" ] && [ "$(grep event_json,event_datetime,ios_ifa,android_id $TEMPORARY_DATA_FILE)" ]
+			then
+			sed 1d $TEMPORARY_DATA_FILE | sed "s/^/$FILE_APPLICATION_ID,/" |clickhouse-client -h $SERVER -u $USER --password $PASSWORD --query="INSERT INTO $DATABASE.adview_event FORMAT CSV"
+			if [ "$?" -eq 0 ] 
+				then
+				echo "Ad views for  application ID $FILE_APPLICATION_ID for date period $FILE_DATESINCE - $FILE_DATEUNTIL was grabbed" >> $PATH_TO_LOG
+			else	
+				echo "Ad views for  application ID $FILE_APPLICATION_ID for date period $FILE_DATESINCE - $FILE_DATEUNTIL was empty" >> $PATH_TO_LOG
+			fi
+			sed -n "/$FILE_TOKEN,$FILE_APPLICATION_ID,$FILE_DATESINCE,$FILE_DATEUNTIL/!p" $ADVIEW_QUEUE_FILE >  tmp && mv tmp $ADVIEW_QUEUE_FILE
+		fi
+		} &> /dev/null
+	done < $ADVIEW_QUEUE_FILE;
+	if [ -s $TEMPORARY_DATA_FILE ]
+		then
+		rm $TEMPORARY_DATA_FILE
+	fi
+	while read i 
+	do
+		FILE_TOKEN=$(echo $i | cut -f1 -d,)
+		FILE_APPLICATION_ID=$(echo $i | cut -f2 -d,)
+		FILE_DATESINCE=$(echo $i | cut -f3 -d,)
+		FILE_DATEUNTIL=$(echo $i | cut -f4 -d,) 
+		FILE_APPLICATION_NAME=$(echo $i | cut -f5 -d,) 
+
+		if [ "$FILE_APPLICATION_ID" != "$APPLICATION_ID" ]; then
+			continue
+		fi
+		{
+		 curl -G \
+		 'https://beta.api-appmetrika.yandex.ru/logs/v1/export/installations.csv' \
+		 -d oauth_token=$FILE_TOKEN \
+		 -d date_since=$FILE_DATESINCE \
+		 -d date_until=$FILE_DATEUNTIL \
+		 -d fields=app_package_name,install_datetime,os_name,ios_ifa,android_id,publisher_id,publisher_name,tracking_id,tracker_name \
+		 -d application_id=$FILE_APPLICATION_ID > $TEMPORARY_DATA_FILE
+		 if [ -s "$TEMPORARY_DATA_FILE" ] && [ "$(grep install_datetime,os_name,ios_ifa,android_id,publisher_id $TEMPORARY_DATA_FILE)" ]
+			then
+			 sed 1d $TEMPORARY_DATA_FILE | sed "s/^/$FILE_APPLICATION_NAME,$FILE_APPLICATION_ID,/" | clickhouse-client -h $SERVER -u $USER --password $PASSWORD --query="INSERT INTO $DATABASE.installations FORMAT CSV"
+			if [ "$?" -eq 0 ] 
+				then
+				echo "Installs for  application ID $FILE_APPLICATION_ID for date period $FILE_DATESINCE - $FILE_DATEUNTIL was grabbed" >> $PATH_TO_LOG
+			else
+				echo "Installs for  application ID $FILE_APPLICATION_ID for date period $FILE_DATESINCE - $FILE_DATEUNTIL was empty" >> $PATH_TO_LOG
+			fi
+			sed -n "/$FILE_TOKEN,$FILE_APPLICATION_ID,$FILE_DATESINCE,$FILE_DATEUNTIL/!p" $INSTALL_QUEUE_FILE >  tmp && mv tmp $INSTALL_QUEUE_FILE
+		fi		
+		} &> /dev/null
+	done < $INSTALL_QUEUE_FILE
+	if [ -s $TEMPORARY_DATA_FILE ]
+		then
+		rm $TEMPORARY_DATA_FILE
+	fi
+	{
+	curl -G \
+	 'https://beta.api-appmetrika.yandex.ru/logs/v1/export/events.csv' \
+	 -d oauth_token=$TOKEN \
+	 -d date_since=$PURCHASE_DATESINCE \
+	 -d date_until=$DATEUNTIL \
+	 -d fields=app_package_name,event_name,event_json,event_datetime,os_name,ios_ifa,android_id \
+	 -d application_id=$APPLICATION_ID \
+	 -d event_name=$PURCHASE_EVENTNAME > $TEMPORARY_DATA_FILE
+	grep -q $TOKEN,$APPLICATION_ID,$PURCHASE_DATESINCE,$DATEUNTIL "$PURCHASE_QUEUE_FILE" 
+	} &>/dev/null
+	if [ "$?" -ne 0 ] && [ ! "$(grep "Wait until they" $TEMPORARY_DATA_FILE)" ]; then
+		echo $TOKEN,$APPLICATION_ID,$PURCHASE_DATESINCE,$DATEUNTIL,$APPLICATION_NAME, >> $PURCHASE_QUEUE_FILE
+		echo "Purchase events for  application ID $APPLICATION_ID for date period $PURCHASE_DATESINCE - $DATEUNTIL was put in queue" >> $PATH_TO_LOG
+	fi
+
+	{
+	curl -G \
+	 'https://beta.api-appmetrika.yandex.ru/logs/v1/export/events.csv' \
+	 -d oauth_token=$TOKEN \
+	 -d date_since=$ADVIEW_DATESINCE \
+	 -d date_until=$DATEUNTIL \
+	 -d fields=app_package_name,event_json,event_datetime,ios_ifa,android_id \
+ 	 -d application_id=$APPLICATION_ID \
+	 -d event_name=$ADVIEW_EVENTNAME > $TEMPORARY_DATA_FILE
+	grep -q $TOKEN,$APPLICATION_ID,$ADVIEW_DATESINCE,$DATEUNTIL "$ADVIEW_QUEUE_FILE" 
+	} &>/dev/null
+	if [ "$?" -ne 0 ] && [ ! "$(grep "Wait until they" $TEMPORARY_DATA_FILE)" ]; then
+		echo $TOKEN,$APPLICATION_ID,$ADVIEW_DATESINCE,$DATEUNTIL, >> $ADVIEW_QUEUE_FILE
+		echo "Ad views for  application ID $APPLICATION_ID for date period $ADVIEW_DATESINCE - $DATEUNTIL was put in queue" >> $PATH_TO_LOG
+	fi
+
+	{
+	curl -G \
+	 'https://beta.api-appmetrika.yandex.ru/logs/v1/export/installations.csv' \
+	 -d oauth_token=$TOKEN \
+	 -d date_since=$INSTALL_DATESINCE \
+	 -d date_until=$DATEUNTIL \
+	 -d fields=app_package_name,install_datetime,os_name,ios_ifa,android_id \
+	 -d application_id=$APPLICATION_ID > $TEMPORARY_DATA_FILE
+	grep -q $TOKEN,$APPLICATION_ID,$INSTALL_DATESINCE,$DATEUNTIL "$INSTALL_QUEUE_FILE" 
+	} &>/dev/null
+	if [ "$?" -ne 0 ] && [ ! "$(grep "Wait until they" $TEMPORARY_DATA_FILE)" ]; then
+		echo $TOKEN,$APPLICATION_ID,$INSTALL_DATESINCE,$DATEUNTIL,$APPLICATION_NAME, >> $INSTALL_QUEUE_FILE
+		echo "Installs for  application ID $APPLICATION_ID for date period $INSTALL_DATESINCE - $DATEUNTIL was put in queue" >> $PATH_TO_LOG
+	fi	
+	if [ -s "$TEMPORARY_DATA_FILE" ]
+		then
+		rm $TEMPORARY_DATA_FILE
+	fi
+
+done < $TEMPORARY_APPLIST_FILE
+rm $TEMPORARY_APPLIST_FILE;
+printf 'Script event grabber was finished at ' >> $PATH_TO_LOG	
+date >> $PATH_TO_LOG
+unset INSTALL_DATESINCE; unset PURCHASE_DATESINCE; unset ADVIEW_DATESINCE; 
+unset TOKEN; unset FILE_TOKEN; 
+unset APPLICATION_ID; unset FILE_APPLICATION_ID;
+unset APPLICATION_NAME; unset FILE_APPLICATION_NAME;
+unset DATESINCE;  unset FILE_DATESINCE;
+unset DATEUNTIL;  unset FILE_DATEUNTIL;
+unset PATH_TO_LOG;  unset USER; unset PASSWORD; unset SERVER; 
+unset PURCHASE_QUEUE_FILE; unset ADVIEW_QUEUE_FILE; unset INSTALL_QUEUE_FILE;

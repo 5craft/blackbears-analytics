@@ -1,0 +1,73 @@
+#!/bin/bash
+########################################################################################
+# List of commands:					     								              #
+# 	    --ch-server=*				              Set clickhouse server connection address (default is localhost)		#
+# 	    -db=*|--ch-database=*	                  	Set database in clickhouse to use (default is 'default')			#
+# 	    --ch-password=*	                        		Set clickhouse password (default is empty)				#
+# 	    --ch-user=*				               Set clickhouse user (default is 'default')					#
+########################################################################################
+
+USER=default
+PASSWORD=''
+SERVER=localhost
+DATABASE=default
+
+for i in "$@"
+do
+	case $i in
+	    --ch-server=*)
+	    SERVER="${i#*=}"
+	    shift # past argument=value
+	    ;;
+	    -db=*|--ch-database=*)
+	    DATABASE="${i#*=}"
+	    shift # past argument=value
+	    ;;
+	    --ch-password=*)
+	    PASSWORD="${i#*=}"
+	    shift # past argument=value
+	    ;;
+	    --ch-user=*)
+	    USER="${i#*=}"
+	    shift # past argument=value
+	    ;;
+	esac
+done
+
+if [ -z ${SERVER+x} ]
+then 
+echo "Server isn't set";
+return 1
+fi
+
+if [ -z ${USER+x} ]
+then 
+echo "Clickhouse user isn't set";
+return 1
+fi
+
+if [ -z ${PASSWORD+x} ]
+then 
+echo "Clickhouse password isn't set";
+return 1
+fi
+
+if [ -z ${DATABASE+x} ]
+then 
+echo "Clickhouse database to use isn't set";
+return 1
+fi
+
+clickhouse-client -h $SERVER -u $USER --password $PASSWORD --query="CREATE DATABASE IF NOT EXISTS $DATABASE"
+clickhouse-client -h $SERVER -u $USER --password $PASSWORD --query="CREATE TABLE IF NOT EXISTS $DATABASE.ad_platform_key (user_id UInt32, app_id UInt32, platform String, api_key String, app_key String, time DateTime) Engine=Log"
+clickhouse-client -h $SERVER -u $USER --password $PASSWORD --query="CREATE TABLE IF NOT EXISTS $DATABASE.appmetrica_app (user_id UInt32, token String, id UInt32, name String) Engine=Log"
+clickhouse-client -h $SERVER -u $USER --password $PASSWORD --query="CREATE TABLE IF NOT EXISTS $DATABASE.purchase_validator (user_id UInt32, app_id UInt32, app_package_name String, os String, app_key String) Engine=Log"
+clickhouse-client -h $SERVER -u $USER --password $PASSWORD --query="CREATE TABLE IF NOT EXISTS $DATABASE.ecpm(app_id UInt32, app_package_name String, platform String, ecpm Float32, date Date, country String) Engine=Log"
+clickhouse-client -h $SERVER -u $USER --password $PASSWORD --query="CREATE TABLE IF NOT EXISTS $DATABASE.adview_revenue(app_id UInt32,app_package_name String,date DateTime,platform String,country String,revenue Float32, publisher_id String, tracking_id String, os_name String) ENGINE = Log"
+clickhouse-client -h $SERVER -u $USER --password $PASSWORD --query="CREATE TABLE IF NOT EXISTS $DATABASE.adview_event ( app_id String, app_package_name String, event_json String, event_datetime DateTime, ios_ifa String, android_id String) ENGINE = Log;"
+clickhouse-client -h $SERVER -u $USER --password $PASSWORD --query="CREATE TABLE IF NOT EXISTS $DATABASE.purchase_event ( app_metrica_name String, app_id String, app_package_name String,event String, event_json String,     event_datetime DateTime,     os_name String,     ios_ifa String,     android_id String) ENGINE = Log;"
+clickhouse-client -h $SERVER -u $USER --password $PASSWORD --query="CREATE  VIEW IF NOT EXISTS $DATABASE.purchase_ios AS SELECT app_metrica_name, app_id, app_package_name, event_json, event_datetime, ios_ifa FROM $DATABASE.purchase_event WHERE os_name='ios'";
+clickhouse-client -h $SERVER -u $USER --password $PASSWORD --query="CREATE  VIEW IF NOT EXISTS $DATABASE.purchase_android AS SELECT app_metrica_name, app_id, app_package_name, event_json, event_datetime, android_id FROM $DATABASE.purchase_event WHERE os_name='android'";
+clickhouse-client -h $SERVER -u $USER --password $PASSWORD --query="CREATE TABLE IF NOT EXISTS $DATABASE.installations (    app_metrica_name String,    app_id String,    app_package_name String,    install_datetime DateTime,    os_name String,     ios_ifa String,     android_id String,    publisher_id String,    publisher_name String,    tracking_id String,    tracker_name String) ENGINE = Log"
+clickhouse-client -h $SERVER -u $USER --password $PASSWORD --query="CREATE TABLE IF NOT EXISTS $DATABASE.valid_purchase(    app_metrica_name String,    app_id String,    app_package_name String,    purchase_datetime DateTime,    amount Float32,    product_id String,    transaction_id String,    os_name String,    device_id String,    is_sandbox UInt8,    publisher_id String,    publisher_name String,    tracking_id String,    tracker_name String) ENGINE = Log" 
+unset USER; unset PASSWORD; unset SERVER; unset DATABASE;
