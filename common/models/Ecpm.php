@@ -1,9 +1,25 @@
 <?php
+/*
+ * Black Bears Analytics
+ * @author Blackbears
+ * @link blackbears.mobi
+ * @version 1.0
+ */
 namespace common\models;
 
 use common\components\AdPlatformComponent;
 use Yii;
 use common\components\ClickhouseModelComponent;
+/*
+ * This is the model class for table "ecpm"
+ * The followings are the available columns in table "ecpm"
+ * @property $app_id integer
+ * @property $app_package_name string
+ * @property $platform string
+ * @property $ecpm float
+ * @property $date string
+ * @property $country string
+ */
 class Ecpm extends ClickhouseModelComponent
 {
     public $app_id;

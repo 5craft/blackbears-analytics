@@ -1,8 +1,25 @@
 <?php
+/*
+ * Black Bears Analytics
+ * @author Blackbears
+ * @link blackbears.mobi
+ * @version 1.0
+ */
 namespace common\models;
 
 use Yii;
 use common\components\ClickhouseModelComponent;
+
+/*
+This is the model class for table "ad_platform_key"
+ * The followings are the available columns in table "ad_platform_key"
+ * @property $user_id integer
+ * @property $app_id integer
+ * @property $platform string
+ * @property $api_key string
+ * @property $app_key string
+ * @property $time string
+ */
 class AdPlatformKey extends ClickhouseModelComponent
 {
     public $user_id;

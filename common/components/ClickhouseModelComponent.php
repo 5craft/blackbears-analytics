@@ -1,9 +1,18 @@
 <?php
+/*
+ * Black Bears Analytics
+ * @author Blackbears
+ * @link blackbears.mobi
+ * @version 1.0
+ */
 namespace common\components;
 
 use Yii;
 use yii\helpers\Json;
-
+/*
+ * Base class of any clickhouse model
+ * @property $FIELD_LIST array Contains all field names of the table
+ */
 abstract class ClickhouseModelComponent implements ModelComponent{
 
     public static $FIELD_LIST=[];

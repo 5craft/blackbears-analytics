@@ -1,8 +1,32 @@
 <?php
+/*
+ * Black Bears Analytics
+ * @author Blackbears
+ * @link blackbears.mobi
+ * @version 1.0
+ */
 namespace common\models;
 
 use Yii;
 use common\components\ClickhouseModelComponent;
+/*
+ * This is the model class for table "purchase_validator"
+ * The followings are the available columns in table "purchase_validator"
+ * @property $app_metrica_name string
+ * @property $app_id string
+ * @property $app_package_name string
+ * @property $purchase_datetime string
+ * @property $amount float
+ * @property $product_id string
+ * @property $transaction_id string
+ * @property $os_name string
+ * @property $device_id string
+ * @property $is_sandbox integer
+ * @property $publisher_id string
+ * @property $publisher_name string
+ * @property $tracking_id string
+ * @property $tracker_name string
+ */
 class ValidPurchase extends ClickhouseModelComponent
 {
     public $app_metrica_name;

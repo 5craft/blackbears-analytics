@@ -1,11 +1,20 @@
 <?php
+/*
+ * Black Bears Analytics
+ * @author Blackbears
+ * @link blackbears.mobi
+ * @version 1.0
+ */
 namespace common\components;
 
 use common\models\AdPlatformKey;
 use Yii;
 use yii\base\Exception;
 use yii\helpers\Json;
-
+/*
+ * Class-helper for advertisement platform communication
+ * To add grabbing method for new platform, you should name it as 'get%PLATFORM_NAME%Ecpm' and return array of Ecpm-like arrays with data
+ */
 class AdPlatformComponent {
     /**
      * Grab ecpm for exact ad_view

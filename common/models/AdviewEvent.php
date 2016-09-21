@@ -1,9 +1,27 @@
 <?php
+/*
+ * Black Bears Analytics
+ * @author Blackbears
+ * @link blackbears.mobi
+ * @version 1.0
+ */
 namespace common\models;
 
 use Yii;
 use common\components\ClickhouseModelComponent;
 use yii\helpers\Json;
+/*
+ * This is the model class for table "adview_event"
+ * The followings are the available columns in table "adview_event"
+ * @property $app_id string
+ * @property $app_package_name string
+ * @property $event_json string
+ * @property $event_datetime string
+ * @property $ios_ifa string
+ * @property $android_id string
+ * @property $country string    Country field parsed from $event_json
+ * @property $platform string Platform field parsed from $event_json
+ */
 class AdviewEvent extends ClickhouseModelComponent
 {
     public $app_id;

@@ -1,4 +1,10 @@
 <?php
+/*
+ * Black Bears Analytics
+ * @author Blackbears
+ * @link blackbears.mobi
+ * @version 1.0
+ */
 namespace backend\controllers;
 
 use common\models\AdPlatformKey;
@@ -11,7 +17,9 @@ use yii\web\Controller;
 use common\models\ValidPurchase;
 use common\models\Installation;
 use yii\web\Cookie;
-
+/*
+ * Site main controller class
+ */
 class SiteController extends Controller
 {
     public function actions()

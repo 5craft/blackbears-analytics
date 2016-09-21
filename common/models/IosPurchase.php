@@ -1,9 +1,28 @@
 <?php
+/*
+ * Black Bears Analytics
+ * @author Blackbears
+ * @link blackbears.mobi
+ * @version 1.0
+ */
 namespace common\models;
 
 use Yii;
 use common\components\ClickhouseModelComponent;
 use yii\helpers\Json;
+/*
+ * This is the model class for table "purchase_ios"
+ * The followings are the available columns in table "purchase_ios"
+ * @property $app_metrica_name string
+ * @property $app_id string
+ * @property $app_package_name string
+ * @property $event_json string
+ * @property $event_datetime string
+ * @property $ios_ifa string
+ * @property $amount string Amount field parsed from $event_json
+ * @property $product_id string Product id field parsed from $event_json
+ * @property $receipt string Receipt field parsed from $event_json
+ */
 class IosPurchase extends ClickhouseModelComponent
 {
     public $app_metrica_name;

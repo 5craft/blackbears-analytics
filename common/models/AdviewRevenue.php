@@ -1,10 +1,28 @@
 <?php
+/*
+ * Black Bears Analytics
+ * @author Blackbears
+ * @link blackbears.mobi
+ * @version 1.0
+ */
 namespace common\models;
 
 use common\components\ClickhouseQueryComponent;
 use Yii;
 use common\components\ClickhouseModelComponent;
-use yii\helpers\Json;
+/*
+ * This is the model class for table "adview_revenue"
+ * The followings are the available columns in table "adview_revenue"
+ * @property $app_id integer
+ * @property $app_package_name string
+ * @property $date string
+ * @property $platform string
+ * @property $country string
+ * @property $revenue float
+ * @property $publisher_id string
+ * @property $tracking_id string
+ * @property $os_name string
+ */
 class AdviewRevenue extends ClickhouseModelComponent
 {
     public $app_id;

@@ -1,9 +1,25 @@
 <?php
+/*
+ * Black Bears Analytics
+ * @author Blackbears
+ * @link blackbears.mobi
+ * @version 1.0
+ */
 namespace common\components;
 
 use Yii;
 use yii\helpers\Json;
-
+/*
+ * Class for assembling and executing query to clickhouse
+ * @property $selectStatement string|'*'
+ * @property $andWhere array
+ * @property $groupStatement string
+ * @property $orderStatement string
+ * @property $limitStatement string
+ * @property $offsetStatement string
+ * @property $tableName string
+ * @property $classCaller string
+ */
 class ClickhouseQueryComponent
 {
     const TYPE_STRING = 0;
