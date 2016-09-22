@@ -46,7 +46,7 @@ class PurchaseValidator extends ClickhouseModelComponent
      * @return array Associative array. Key represent app_package_name and value stores app_key
      */
     public static function getAllForVerify(){
-        $result = self::findAll();
+        $result = self::find()->select('user_id, app_id, anyLast(app_package_name) as app_package_name, any(os) as os, anyLast(app_key) as app_key')->groupBy('app_id, user_id')->all();
         $return = [];
         foreach ($result as $item){
             $return[$item->app_package_name] = $item->app_key;
@@ -54,4 +54,12 @@ class PurchaseValidator extends ClickhouseModelComponent
         return $return;
     }
 
+    public static function checkEmpty($appId){
+        $validator = self::find()->select('anyLast(user_id) as user_id, app_id, anyLast(app_package_name) as app_package_name, any(os) as os, anyLast(app_key) as app_key')->andWhere('app_id='.$appId)->groupBy('app_id')->one();
+        if(!$validator)
+            return new ValidPurchase();
+        if($validator->os == 'android' && (empty($validator->app_package_name) || empty($validator->app_key)))
+            return $validator;
+        return false;
+    }
 }

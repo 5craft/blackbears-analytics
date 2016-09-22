@@ -20,8 +20,8 @@ $this->title = Yii::$app->name . ' / '. Yii::t('error', $name);
 		switch($error_code){
 			case 44:
 				echo '<a class="login-button" href="'.Yii::$app->params['yandex_url']['appmetrica_app_add'].'">
-							<span class="top">'.Yii::t('error', 'Add new app').'</span>
-							<span class="bottom">'.Yii::t('error', 'through Appmetrica').'</span>
+							<span class="top">'.Yii::t('dashboard', 'Add new app').'</span>
+							<span class="bottom">'.Yii::t('dashboard', 'through Appmetrica').'</span>
 						</a>';
 				break;
 			default:

@@ -14,16 +14,16 @@ $this->title = Yii::$app->name . ' / Login';
 	<!-- /.login-logo -->
 	<?php switch($error_code){
 	        case 6:
-	            $errorMessage = Yii::t('dashboard', 'Empty cookies relogin');
+	            $errorMessage = Yii::t('error', 'Empty cookies relogin');
 	            break;
 	        case 7:
-	            $errorMessage = Yii::t('dashboard', 'Appmetrica apps load error');
+	            $errorMessage = Yii::t('error', 'Appmetrica apps load error');
 	            break;
 	        case 8:
-	            $errorMessage = Yii::t('dashboard', 'Yandex account info error');
+	            $errorMessage = Yii::t('error', 'Yandex account info error');
 	            break;
 	        case 9:
-	            $errorMessage = Yii::t('dashboard', 'No oAuth token');
+	            $errorMessage = Yii::t('error', 'No oAuth token');
 	            break;
 	};
 	if(isset($errorMessage)):?>

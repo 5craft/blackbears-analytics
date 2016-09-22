@@ -35,11 +35,12 @@ return [
  '{n, plural, one{# app} few{# apps} many{# apps} other{# apps}}' =>
  '{n, plural, one{# приложение} few{# приложения} many{# приложений} other{# приложения}}',
  
- 'Appmetrica apps load error' 	=> 'Ошибка загрузки списка приложений из Appmetrica',
- 'Empty cookies relogin'		=> 'Не можем найти куки, авторизуйтесь заново',
- 'Yandex account info error'	=> 'Не удается получить информацию из аккаунта Яндекс',
- 'No Yandex oAuth token'		=> 'Яндекс oAuth-токен не найден',
- 
  'Login'						=> 'Войти',
  'with Appmetrica'				=> 'через AppMetrica',
+ 'through Appmetrica' 			=> 'приложение в AppMetrica',
+    
+ 'Settings  purchase verification'	=> 'Настройки проверки покупок',
+ 'Package name'					=> 'Название пакета приложения',
+ 'Purchase Application Key'		=> 'Секретный ключ',
+ 
 ];

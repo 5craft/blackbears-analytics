@@ -16,6 +16,7 @@ use yii\helpers\Json;
 use yii\web\Controller;
 use common\models\ValidPurchase;
 use common\models\Installation;
+use common\models\PurchaseValidator;
 use yii\web\Cookie;
 /*
  * Site main controller class
@@ -162,8 +163,13 @@ class SiteController extends Controller
             }
 		return $trackers;
 	}
-	
-	protected function returnAjaxResponse($response) {
+
+    /**
+     * Returns server answer as JSON. Used for ajax requests
+     * @param $response
+     * @return mixed
+     */
+    protected function returnAjaxResponse($response) {
 		Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;	
 		return $response;
 	}
@@ -259,6 +265,7 @@ class SiteController extends Controller
         $lastEcpmUpdate = '';
         $trackers = [];
         $connectedPlatforms = [];
+		$purchaseValidator = false;
 		switch($chosenApps) {
             case 0:
 			case null:
@@ -279,6 +286,7 @@ class SiteController extends Controller
 		 		$hideSpecFilter = false;
                 $app = Installation::find()->select('app_id, anyLast(app_package_name) as app_package_name, max(install_datetime) as install_datetime')->addInWhere('app_id',$chosenApps)->groupBy('app_id')->orderBy('install_datetime asc')->one();
                 $connectedPlatforms = AdPlatformKey::getPlatforms($userId,$chosenApps);
+                $purchaseValidator = PurchaseValidator::checkEmpty($chosenApps);
                 $dashboard = $this->getDashboardByFilter($chosenApps, null, $dateSince, $dateUntil, null, $trackersList, $platformsList);
                 if($app) {
                     $lastEcpmUpdate = Ecpm::getUpdateDate($app->app_id, $app->app_package_name);
@@ -296,7 +304,8 @@ class SiteController extends Controller
             'platformsList' => $platformsList,
            	'connectedPlatforms' => $connectedPlatforms,
             'lastEcpmUpdate' => ($lastEcpmUpdate!=''?strtotime($lastEcpmUpdate):0),
-            'hideSpecFilter' => $hideSpecFilter
+            'hideSpecFilter' => $hideSpecFilter,
+            'purchaseValidator' => $purchaseValidator
         ];
         
         return $params;
@@ -307,21 +316,21 @@ class SiteController extends Controller
      * @return array
      */
     public function actionAjaxSaveAdkey(){
-    	if (!Yii::$app->request->isAjax) 
+    	if (!Yii::$app->request->isAjax)
 			return $this->returnAjaxResponse(['status' => 'error', 'error' => "It's not ajax request"]);
-		
+
 		$userCookie = $this->getUserCookies(false);
         $userId = $userCookie['id'];
 		if(!$userId)
 	        return $this->returnAjaxResponse(['status' => 'error', 'error' => "User id isn't set."]);
-		 	
+
 		$keys = Yii::$app->request->post('keys');
-		if (!is_array($keys)) return $this->returnAjaxResponse(['status' => 'error', 'error' => "Keys id isn't set."]);	
-        
+		if (!is_array($keys)) return $this->returnAjaxResponse(['status' => 'error', 'error' => "Keys id isn't set."]);
+
         $connectedApps = AdPlatformKey::getConnectedApps($userId);
         $newKeys = [];
         foreach ($keys as $app_id => $app){
-         	if (!is_array($keys)) return $this->returnAjaxResponse(['status' => 'error', 'error' => "Keys id isn't set."]);	
+         	if (!is_array($keys)) return $this->returnAjaxResponse(['status' => 'error', 'error' => "Keys id isn't set."]);
             foreach ($app as $platform => $apiKeys){
             	if(!isset($connectedApps[$app_id]) || !isset($connectedApps[$app_id][$platform]) || $apiKeys != $connectedApps[$app_id][$platform]){
             		$newKey = new AdPlatformKey();
@@ -337,11 +346,38 @@ class SiteController extends Controller
 		}
 		if(count($newKeys) > 0)
 			AdPlatformKey::insertBatch($newKeys);
-		
+
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         return $this->returnAjaxResponse(['status' => 'ok']);
     }
-	
+
+    /**
+     * Saves app validator for the application
+     * @return array
+     */
+    public function actionAjaxSaveAppValidator(){
+        if (!Yii::$app->request->isAjax)
+            return $this->returnAjaxResponse(['status' => 'error', 'error' => "It's not ajax request"]);
+        $userCookie = $this->getUserCookies(false);
+        $userId = $userCookie['id'];
+        if(!$userId)
+            return $this->returnAjaxResponse(['status' => 'error', 'error' => "User id isn't set."]);
+        $appValidator = Yii::$app->request->post('validator');
+        if (!is_array($appValidator)) return $this->returnAjaxResponse(['status' => 'error', 'error' => "App validator isn't set."]);
+        $connectedApps = AppmetricaApp::getAppList($userId);
+        if(!isset($connectedApps[$appValidator['app_id']])) return $this->returnAjaxResponse(['status' => 'error', 'error' => "You are not permitted."]);
+        $newValidator = new PurchaseValidator();
+        $newValidator->user_id = $userId;
+        $newValidator->app_id = $appValidator['app_id'];
+        $newValidator->app_package_name = (!empty($appValidator['app_package_name'])) ? $appValidator['app_package_name'] : '';
+        $newValidator->os = (!empty($appValidator['os'])) ? $appValidator['os'] : 'android';
+        $newValidator->app_key = (!empty($appValidator['app_key'])) ? $appValidator['app_key'] : '';
+        $newValidator->insert();
+
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        return $this->returnAjaxResponse(['status' => 'ok']);
+    }
+
     /**
      * Get data from url request
      * @param $url

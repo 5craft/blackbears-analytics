@@ -447,7 +447,8 @@ iframe {
     background-image: -webkit-image-set(url('../img/vungle_logo_hover.png') 1x, url('../img/vungle_logo_hover@2x.png') 2x);
 }
 
-.ads_platform_keys_show_box {
+.ads_platform_keys_show_box,
+.purchase_key_show_box {
 	position:relative;
 	overflow:hidden;
 	background-color:#FDFDFD;
@@ -461,18 +462,21 @@ iframe {
 	font-family: 'museo_sans_cyrl700';
 	font-weight: normal;
 }
-#ads_platform_keys_box .ads_platform_keys_show_box .box {
+#ads_platform_keys_box .ads_platform_keys_show_box .box,
+#purchase_key_box .purchase_key_show_box .box {
 	width: 164px;
 	display:inline-block;
 	padding: 0 5px 0 0;
 	vertical-align: middle;
 }
 
-.ads_platform_keys_show_box .label {
+.ads_platform_keys_show_box .label,
+.purchase_key_show_box .label {
 	display:block;
 	font-size:0.9em;
 }
-.ads_platform_keys_show_box .key {
+.ads_platform_keys_show_box .key,
+.purchase_key_show_box .key {
 	display:block;
 	color:#465361;
 	white-space: nowrap;
@@ -485,15 +489,20 @@ iframe {
 	right: 15px;
 	line-height: 27px;
 }
-.ads_platform_keys_show_box .save_keys { display:none; }
+.ads_platform_keys_show_box .save_keys,
+.purchase_key_show_box .save_keys { 
+	display:none; 
+}
 
-#ads_platform_keys_box .ads_platform_keys_show_box.edit {
+#ads_platform_keys_box .ads_platform_keys_show_box.edit,
+#purchase_key_box .purchase_key_show_box.edit {
 	background-color:transparent;
 	border:none;
 	padding: 0;
 	cursor: auto;
 }
-#ads_platform_keys_box .ads_platform_keys_show_box.edit .box {
+#ads_platform_keys_box .ads_platform_keys_show_box.edit .box,
+#purchase_key_box .purchase_key_show_box.edit .box {
 	width: 340px;
 	background-color:#FDFDFD;
 	border:1px solid #EDF2F0;
@@ -502,7 +511,8 @@ iframe {
 	padding: 5px 15px;
 	margin:4px 0;
 }
-#ads_platform_keys_box .ads_platform_keys_show_box.edit .save_keys { 
+#ads_platform_keys_box .ads_platform_keys_show_box.edit .save_keys,
+#purchase_key_box .purchase_key_show_box.edit .save_keys { 
 	display:block; 
 	float:left;
 	background:#38D893;

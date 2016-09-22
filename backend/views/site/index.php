@@ -38,7 +38,8 @@ $this->title = Yii::$app->name;
     									'connectedPlatforms' => $connectedPlatforms,
     									'lastEcpmUpdate' 	=> $lastEcpmUpdate,
     									'hideSpecFilter'	=> $hideSpecFilter,
-										'dashboard' => $dashboard
+										'dashboard' => $dashboard,
+										'purchaseValidator'	=> $purchaseValidator									
     									]) ?>
     		</div>		
     				

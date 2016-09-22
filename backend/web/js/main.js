@@ -8,6 +8,7 @@ function DashboardFilter() {
     this.appListBox = null;
     this.trackerListBox = null;
     this.adsPlatformListBox = null;
+    this.appValidatorBox = null;
     this.dateListBox = null;
     
     this.dateFromBox = null;
@@ -32,7 +33,7 @@ function DashboardFilter() {
     	this.trackerListBox = $('.filter_box.tracker');
     	this.adsPlatformListBox = $('.filter_box.ads');
     	this.dateListBox = $('.calendarfilter_box ul');
-    	
+    	this.appValidatorBox = $('#purchase_key_box');
     	this.bindEvents();
     };
 
@@ -74,6 +75,24 @@ function DashboardFilter() {
 			self.accountBox.toggleClass('active');
 			return false;
 		});
+		
+		if (this.appValidatorBox.length) {
+			this.appValidatorBox.find('.save_keys').off('click').on('click', function(event) {
+				var keys = {};
+				var isEmpty = false;
+				
+				self.appValidatorBox.find('.key').each(function(ind, keyBox){
+					keys[$(keyBox).attr('data-type')] = jQuery.trim($(keyBox).text());
+					if (!$(keyBox).text()) isEmpty=true;
+				});
+				
+				if (!isEmpty) {
+					self.saveValidatorKeys(keys);
+					self.appValidatorBox.addClass('hidden');
+				}
+				return false;
+		});
+		}
 	};
 	
 	this.bindPlatformEvents = function() {
@@ -152,6 +171,31 @@ function DashboardFilter() {
 
 		$.ajax({
 			url : 'site/ajax-save-adkey',
+			type: 'post',
+		    data: data,
+		    success: function (response) {
+		    	if (response && response.status == 'ok') {
+		    		return true;
+		    	} else {
+		    		self.showError(response.error);
+		    	}
+		    },
+		    error : function() {
+		    	self.showError('Произошла ошибка, попробуйте позже');
+		    }
+		});
+	};
+	
+	this.saveValidatorKeys = function(keys) {
+		var self = this;
+		var app_id = this.activeFilter.app_id;
+		if (!app_id || !keys) return false;
+		
+		var data = {}; data['validator'] = keys;
+		data['validator']['app_id'] = app_id;
+		
+		$.ajax({
+			url : 'site/ajax-save-app-validator',
 			type: 'post',
 		    data: data,
 		    success: function (response) {
