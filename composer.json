@@ -1,0 +1,35 @@
+{
+   "name": "BlackBears Analytics", 
+   "description": "BlackBears Analytics", 
+   "keywords": [
+        "Black Bears analytics", 
+        "mobile analytics"
+    ], 
+    "type": "project", 
+    "license": "Apache License", 
+    "support": {  
+        "source": "https://github.com/5craft/blackbears-analytics" 
+    },
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=5.4.0",
+        "yiisoft/yii2": ">=2.0.6",
+        "yiisoft/yii2-bootstrap": "*",
+        "8bitov/clickhouse-php-client":"*"
+    },
+    "require-dev": {
+        "yiisoft/yii2-debug": "*"
+    },
+    "config": {
+        "process-timeout": 1800
+    },
+    "extra": {
+        "asset-installer-paths": {
+            "npm-asset-library": "vendor/npm",
+            "bower-asset-library": "vendor/bower"
+        }
+    },
+    "scripts": {
+        "post-install-cmd": "php init --env=Development --overwrite=n; cp data/fix/Statement.php vendor/8bitov/clickhouse-php-client/src/Statement.php"
+    }
+}
