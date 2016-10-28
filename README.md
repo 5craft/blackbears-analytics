@@ -18,18 +18,19 @@ BlackBears Analytics - аналитика для мобильных прилож
 ----
 
 1.	Загрузить проект.
-2.	Запустить скрипт из папки с корнем проекта _composer_ командой `composer install`
- 2.1	Если ваша версия PHP < 5.6 следует применить фикс: из папки _корень-проекта/data/fix_ скопировать файл _Statement.php_ в директорию _корень-проекта/vendor/8bitov/clickhouse-php-client/src/_
+2.	Выполнить команду _composer global require "fxp/composer-asset-plugin:*"_, затем запустить скрипт из папки с корнем проекта _composer_ командой `composer install`
+
+        2.1.	Если ваша версия PHP < 5.6 следует применить фикс: из папки _корень-проекта/data/fix_ скопировать файл _Statement.php_ в директорию _корень-проекта/vendor/8bitov/clickhouse-php-client/src/_
 3.	Выполнить следующую команду из корня проекта `php init` и проследовать инструкциям
 
 4.	Выполнить необходимые минимальные настройки в конфигах:
-  1. В файле _/backend/config/params-local.php_ указать значение параметра _yandex_oauth_id_. [Инструкция по получению __yandex_oauth_id__](#Настройка-Яндекс-oauth-авторизации). 
-  2. В файле _/common/config/main-local.php_ указать параметры подключения к ClickHouse: 
-    -- _components['clickhouse']['address']_
-    -- _components['clickhouse']['port']_
-    -- _components['clickhouse']['username']_
-    -- _components['clickhouse']['password']_
-    -- _components['clickhouse']['database']_
+        1. В файле _/backend/config/params-local.php_ указать значение параметра _yandex_oauth_id_. [Инструкция по получению __yandex_oauth_id__](#Настройка-Яндекс-oauth-авторизации). 
+        2. В файле _/common/config/main-local.php_ указать параметры подключения к ClickHouse: 
+            * _components['clickhouse']['address']_
+            * _components['clickhouse']['port']_
+            * _components['clickhouse']['username']_
+            * _components['clickhouse']['password']_
+            * _components['clickhouse']['database']_
 5.	Настройка веб-сервера идентична настройке проекта на базе Yii2. Подробную инструкцию можно увидеть по ссылке: https://github.com/yiisoft/yii2-app-advanced/blob/master/docs/guide/start-installation.md
 6. Настроить [отправку событий в AppMerica](#Отправка-в-appmetrica-событий-и-их-структура)
 7. Запуск скрипта по [сборку событий из AppMerica](#Сбор-информации-по-событиям-из-appmetrica)
@@ -69,7 +70,7 @@ BlackBears Analytics - аналитика для мобильных прилож
     * _amount_ - сумма покупки
     * _response_data_ - ответ от Google Play
     * _signature_ - подпись покупки
-    * 
+    
 После того, как __Black Bears Analytics__ получит от AppMetrica события об оплате, каждая покупка проверяется и для подсчета In-App Revenue приложения используются только покупки, подтвержденные Apple и Google.
 2. Для подсчета __Ads Revenue__ приложения в AppMetrica необходимо отправлять событие _ads_view_ (вы можете использовать любое название события, не забудьте только указать его в параметрах скрипта для [сбора информации из AppMetrica](#Сбор-информации-по-событиям-из-appmetrica)) со следующими параметрами:
   * _country_ - код страны местоположения девайса в двубуквенном формате - RU, GE и т.д.)
